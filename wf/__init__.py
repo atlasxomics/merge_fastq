@@ -37,7 +37,7 @@ def merge_task(
                 if re.search(read_re, name)}
     len_reads = len(read_ids)
     if len_reads == 1:
-        read_msg = f"Reads all of type {read_ids[0]}" 
+        read_msg = f"Reads all of same type" 
         logging.info(read_msg)
         message(typ="info", data={"title": "test", "body": read_msg})
     elif len_reads == 0:
