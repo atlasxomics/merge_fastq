@@ -31,23 +31,18 @@ def merge_task(
     file_names = [file.split("/")[-1] for file in input_files]
 
     # Check that all fastq files contain the same read
-    read_re = "_[R|I][1|2]_"
+    read_re = re.compile("_[R|I][1|2]_")
     if all(re.search(read_re, name) for name in file_names):
 
         read_ids = {re.search(read_re, name).group() for name in file_names}
-        len_reads = len(read_ids)
-
-        if len_reads == 1:
-            read_msg = f"Reads all of same type: {read_ids}" 
-            logging.info(read_msg)
-            message(typ="info", data={"title": "read test", "body": read_msg})
-        elif len_reads > 1:
+        if len(read_ids) > 1:
             read_msg = f"Multiple read types detected: {read_ids}" 
             logging.warning(read_msg)
             message(typ="warning", data={"title": "read test", "body": read_msg})
+
     else:
 
-        read_msg = f"One or more files missing read ID (ie. R1, R2)" 
+        read_msg = "One or more files missing read ID (ie. R1, R2)" 
         logging.info(read_msg)
         message(typ="info", data={"title": "read test", "body": read_msg})
 
