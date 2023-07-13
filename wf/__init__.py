@@ -31,23 +31,25 @@ def merge_task(
     file_names = [file.split("/")[-1] for file in input_files]
 
     # Check that all fastq files contain the same read
-    read_re = "_[R|I][1|2]_" 
-    read_ids = {re.search(read_re, name).group()
-                for name in file_names
-                if re.search(read_re, name)}
-    len_reads = len(read_ids)
-    if len_reads == 1:
-        read_msg = f"Reads all of same type: {read_ids}" 
+    read_re = "_[R|I][1|2]_"
+    if all(re.search(read_re, name) for name in file_names):
+
+        read_ids = {re.search(read_re, name).group() for name in file_names}
+        len_reads = len(read_ids)
+
+        if len_reads == 1:
+            read_msg = f"Reads all of same type: {read_ids}" 
+            logging.info(read_msg)
+            message(typ="info", data={"title": "read test", "body": read_msg})
+        elif len_reads > 1:
+            read_msg = f"Multiple read types detected: {read_ids}" 
+            logging.warning(read_msg)
+            message(typ="warning", data={"title": "read test", "body": read_msg})
+    else:
+
+        read_msg = f"One or more files missing read ID (ie. R1, R2)" 
         logging.info(read_msg)
-        message(typ="info", data={"body": read_msg})
-    elif len_reads == 0:
-        read_msg = "No read type (ie. R1) detected in file name" 
-        logging.warning(read_msg)
-        message(typ="warning", data={"body": read_msg})
-    elif len_reads > 1:
-        read_msg = f"Multiple read types detected: {read_ids}" 
-        logging.warning(read_msg)
-        message(typ="warning", data={"body": read_msg})
+        message(typ="info", data={"title": "read test", "body": read_msg})
 
     # check that all fastq files have the same file prefix and type
 
@@ -57,13 +59,13 @@ def merge_task(
 
     in_msg = f"Merging initiated with {' '.join(file_names)}" 
     logging.info(in_msg)
-    message(typ="info", data={"body": in_msg})
+    message(typ="info", data={"title": "merge initiated", "body": in_msg})
 
     subprocess.run(_merge_cmd, stdout=open(out_file, "w"))
 
     out_msg = f"Files successfully merged into {out_file}"
     logging.info(out_msg)
-    message(typ="info", data={"body": out_msg})
+    message(typ="info", data={"title": "merge completed", "body": out_msg})
 
     local_location = f"/root/{out_file}"
     remote_location = f"latch://13502.account/merged/{output_dir}/{out_file}"
