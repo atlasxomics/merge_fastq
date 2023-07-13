@@ -37,17 +37,17 @@ def merge_task(
                 if re.search(read_re, name)}
     len_reads = len(read_ids)
     if len_reads == 1:
-        read_msg = f"Reads all of same type" 
+        read_msg = f"Reads all of same type: {read_ids}" 
         logging.info(read_msg)
-        message(typ="info", data={"title": "test", "body": read_msg})
+        message(typ="info", data={"body": read_msg})
     elif len_reads == 0:
         read_msg = "No read type (ie. R1) detected in file name" 
         logging.warning(read_msg)
-        message(typ="warning", data={"title": "test", "body": read_msg})
+        message(typ="warning", data={"body": read_msg})
     elif len_reads > 1:
         read_msg = f"Multiple read types detected: {read_ids}" 
         logging.warning(read_msg)
-        message(typ="warning", data={"title": "test", "body": read_msg})
+        message(typ="warning", data={"body": read_msg})
 
     # check that all fastq files have the same file prefix and type
 
@@ -57,13 +57,13 @@ def merge_task(
 
     in_msg = f"Merging initiated with {' '.join(file_names)}" 
     logging.info(in_msg)
-    message(typ="info", data={"title": "init", "body": in_msg})
+    message(typ="info", data={"body": in_msg})
 
     subprocess.run(_merge_cmd, stdout=open(out_file, "w"))
 
     out_msg = f"Files successfully merged into {out_file}"
     logging.info(out_msg)
-    message(typ="info", data={"title": "out", "body": out_msg})
+    message(typ="info", data={"body": out_msg})
 
     local_location = f"/root/{out_file}"
     remote_location = f"latch://13502.account/merged/{output_dir}/{out_file}"
@@ -93,7 +93,7 @@ metadata = LatchMetadata(
                     message="run id cannot start with a '/'"
                 ),
                 LatchRule(
-                    regex="\ ",
+                    regex="^\S+$",
                     message="run id cannot contain whitespace"
                 )
             ]
@@ -114,7 +114,7 @@ metadata = LatchMetadata(
                     message="output directory name cannot start with a '/'"
                 ),
                 LatchRule(
-                    regex="\ ",
+                    regex="^\S+$",
                     message="directory name cannot contain whitespace"
                 )                
             ]
