@@ -44,7 +44,7 @@ def test_reads(file_names: List[str]) -> Set[str]:
 def test_extensions(file_names: List[str]) -> Set[str]:
     """Extract allowed fastq file extensions and test for uninformity"""
 
-    extension_re = re.compile("\.fastq\.gz|.fa.gz\|\.fastq|\.gz|\.fa")
+    extension_re = re.compile("\.fastq\.gz$|.fa.gz$|\.fastq$|\.gz$|\.fq$")
     extensions = {re.search(extension_re, name).group()
                   for name in file_names
                   if re.search(extension_re, name)}
