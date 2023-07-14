@@ -1,11 +1,9 @@
 """Latch.bio workflow for merging fastq files
 """
 
-import logging
 import subprocess
-import re
+from typing import List
 
-from latch.functions.messages import message
 from latch.resources.tasks import medium_task
 from latch.resources.workflow import workflow
 from latch.types.file import LatchFile
@@ -15,57 +13,40 @@ from latch.types.metadata import (
     LatchParameter,
     LatchRule
 )
-from typing import List
 
-logging.basicConfig(
-    format="%(levelname)s - %(asctime)s - %(message)s",
-    level=logging.INFO
-)
+from wf.utils import log, test_extensions, test_reads
+
 
 @medium_task
 def merge_task(
-    run_id: str, input_files: List[LatchFile], output_dir: str
+    run_id: str,
+    input_files: List[LatchFile],
+    output_dir: str
 ) -> LatchFile:
         
     input_files = [file.local_path for file in input_files]
     file_names = [file.split("/")[-1] for file in input_files]
 
-    # Check that all fastq files contain the same read
-    read_re = re.compile("_[R|I][1|2]_")
-    if all(re.search(read_re, name) for name in file_names):
+    # extract read type and extensions, test for uniformity
+    read_ids = test_reads(file_names)
+    extensions = test_extensions(file_names)
 
-        read_ids = {re.search(read_re, name).group() for name in file_names}
-        if len(read_ids) > 1:
-            read_msg = f"Multiple read types detected: {read_ids}" 
-            logging.warning(read_msg)
-            message(typ="warning", data={"title": "read test", "body": read_msg})
-
-    else:
-
-        read_msg = "One or more files missing read ID (ie. R1, R2)" 
-        logging.info(read_msg)
-        message(typ="info", data={"title": "read test", "body": read_msg})
-
-    # check that all fastq files have the same file prefix and type
-
-    out_file = f"{run_id}_merged_r1.fastq.gz"
-
+    out_file = f"{run_id}_merged_{''.join(read_ids)}{''.join(extensions)}"
+    print(out_file)
     _merge_cmd = ["cat"] + input_files
 
     in_msg = f"Merging initiated with {' '.join(file_names)}" 
-    logging.info(in_msg)
-    message(typ="info", data={"title": "merge initiated", "body": in_msg})
+    log(in_msg, "merge initiated")
 
     subprocess.run(_merge_cmd, stdout=open(out_file, "w"))
 
-    out_msg = f"Files successfully merged into {out_file}"
-    logging.info(out_msg)
-    message(typ="info", data={"title": "merge completed", "body": out_msg})
+    log(f"Files successfully merged into {out_file}", "merge completed")
 
     local_location = f"/root/{out_file}"
     remote_location = f"latch://13502.account/merged/{output_dir}/{out_file}"
 
-    logging.info(f"Uploading files to {remote_location}")
+    log(f"Uploading files to {remote_location}", "upload")
+
     return LatchFile(str(local_location), remote_location)
 
 metadata = LatchMetadata(
@@ -99,6 +80,13 @@ metadata = LatchMetadata(
             display_name="input files",
             batch_table_column=True,
             description="list of fastq files to be merged",
+            rules=[
+                LatchRule(
+                    regex="\.fastq\.gz|.fq.gz\|\.fastq|\.fq",
+                    message="Only fasta files can be merged (.fastq.gz, .fq.gz,\
+                            .fastq, .fq)"
+                )
+            ]
         ),
         "output_dir": LatchParameter(
             display_name="output directory",
