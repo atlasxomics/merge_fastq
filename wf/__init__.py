@@ -1,8 +1,9 @@
 """Latch.bio workflow for merging fastq files
 """
 
+from flytekit.core.annotation import FlyteAnnotation
 import subprocess
-from typing import List
+from typing import Annotated, List
 
 from latch.resources.tasks import medium_task
 from latch.resources.workflow import workflow
@@ -80,13 +81,6 @@ metadata = LatchMetadata(
             display_name="input files",
             batch_table_column=True,
             description="list of fastq files to be merged",
-            rules=[
-                LatchRule(
-                    regex="\.fastq\.gz|.fq.gz\|\.fastq|\.fq",
-                    message="Only fasta files can be merged (.fastq.gz, .fq.gz,\
-                            .fastq, .fq)"
-                )
-            ]
         ),
         "output_dir": LatchParameter(
             display_name="output directory",
@@ -110,7 +104,15 @@ metadata = LatchMetadata(
 @workflow(metadata)
 def merge_workflow(
     run_id: str,
-    input_files: List[LatchFile],
+    input_files: List[Annotated[LatchFile, FlyteAnnotation({
+        "rules": [{
+            "regex": "\.fastq\.gz|.fq.gz\|\.fastq|\.fq",
+            "message": "Only fastq files can be merged (.fastq.gz, .fq.gz,\
+                        .fastq, .fq)"
+                    }]
+                })
+            ]
+        ],
     output_dir: str
 ) -> LatchFile:
     
