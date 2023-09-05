@@ -9,3 +9,4 @@ bar/
 config
 jump_key
 wf_test.py
+.kill_latch
