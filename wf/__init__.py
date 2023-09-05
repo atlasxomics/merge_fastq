@@ -32,8 +32,7 @@ def merge_task(
     read_ids = test_reads(file_names)
     extensions = test_extensions(file_names)
 
-    out_file = f"{run_id}_merged_{''.join(read_ids)}{''.join(extensions)}"
-    print(out_file)
+    out_file = f"{run_id}_merged_R{''.join(read_ids)}{''.join(extensions)}"
     _merge_cmd = ["cat"] + input_files
 
     in_msg = f"Merging initiated with {' '.join(file_names)}" 
