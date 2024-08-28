@@ -24,7 +24,7 @@ def merge_task(
     input_files: List[LatchFile],
     output_dir: str
 ) -> LatchFile:
-        
+
     input_files = [file.local_path for file in input_files]
     file_names = [file.split("/")[-1] for file in input_files]
 
@@ -35,7 +35,7 @@ def merge_task(
     out_file = f"{run_id}_merged_R{''.join(read_ids)}{''.join(extensions)}"
     _merge_cmd = ["cat"] + input_files
 
-    in_msg = f"Merging initiated with {' '.join(file_names)}" 
+    in_msg = f"Merging initiated with {' '.join(file_names)}"
     log(in_msg, "merge initiated")
 
     subprocess.run(_merge_cmd, stdout=open(out_file, "w"))
@@ -48,6 +48,7 @@ def merge_task(
     log(f"Uploading files to {remote_location}", "upload")
 
     return LatchFile(str(local_location), remote_location)
+
 
 metadata = LatchMetadata(
     display_name="merge fastq",
@@ -75,7 +76,7 @@ metadata = LatchMetadata(
                     message="run id cannot contain whitespace"
                 )
             ]
-        ),  
+        ),
         "input_files": LatchParameter(
             display_name="input files",
             batch_table_column=True,
@@ -94,11 +95,12 @@ metadata = LatchMetadata(
                 LatchRule(
                     regex="^\S+$",
                     message="directory name cannot contain whitespace"
-                )                
+                )
             ]
         ),
     },
 )
+
 
 @workflow(metadata)
 def merge_workflow(
@@ -114,7 +116,7 @@ def merge_workflow(
         ],
     output_dir: str
 ) -> LatchFile:
-    
+
     return merge_task(
         run_id=run_id,
         input_files=input_files,
