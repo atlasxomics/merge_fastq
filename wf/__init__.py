@@ -14,6 +14,7 @@ from latch.types.metadata import (
     LatchParameter,
     LatchRule
 )
+from latch.types.metadata import Params, Section, Text
 
 from wf.utils import log, test_extensions, test_reads
 
@@ -49,6 +50,23 @@ def merge_task(
 
     return LatchFile(str(local_location), remote_location)
 
+
+flow = [
+    Section(
+        "Run Parameters",
+        Text(
+            "> IMPORTANT: the order of input files MUST be the same for "
+            "read 1 and read 2.  For example, if the order of input files for "
+            "the read 1 Execution is ['novogene_R1.fastq', 'basespace_R1.fastq"
+            "'], for read 2 the order must be ['novogene_R2.fastq', "
+            "'basespace_R2.fastq'].  If you have questions, please email"
+            "support@atlasxomics.com."
+        ),
+        Params("run_id"),
+        Params("input_files"),
+        Params("output_dir")
+    )
+]
 
 metadata = LatchMetadata(
     display_name="merge fastq",
@@ -99,6 +117,7 @@ metadata = LatchMetadata(
             ]
         ),
     },
+    flow=flow
 )
 
 
