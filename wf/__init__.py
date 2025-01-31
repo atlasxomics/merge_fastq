@@ -59,7 +59,7 @@ flow = [
             "read 1 and read 2.  For example, if the order of input files for "
             "the read 1 Execution is ['novogene_R1.fastq', 'basespace_R1.fastq"
             "'], for read 2 the order must be ['novogene_R2.fastq', "
-            "'basespace_R2.fastq'].  If you have questions, please email"
+            "'basespace_R2.fastq'].  If you have questions, please email "
             "support@atlasxomics.com."
         ),
         Params("run_id"),
